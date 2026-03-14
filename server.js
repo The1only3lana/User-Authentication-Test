@@ -3,20 +3,38 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const fs = require('fs');
+const path = require('path');
 const cors = require('cors');
+const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 
-const loginLimiter = rateLimit({
+const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10
+  max: 10,
+  handler: (req, res) => {
+    res.status(429).json({ error: 'Too many login attempts. Try later. '})
+  }
 })
 
 const app = express();
+
 app.use(express.json());
-app.use(cors());
+app.use(cookieParser());
+app.use(helmet());
 
-app.use('/login', loginLimiter);
+// Sets as the default page
+app.get('/', (req,res)=>{
+  res.sendFile(__dirname + '/public/register.html');
+});
 
+app.get('/test', (req,res)=>{
+  res.send("Server works");
+});
+
+
+app.use('/register', limiter);
+app.use('/login', limiter);
 
 const importantKey = process.env.JWT_SECRET;
 if (!importantKey) {
@@ -25,18 +43,17 @@ if (!importantKey) {
 }
 
 function authenticateToken (req, res, next) {
-  const authHeader = req.headers['authorization'];
-  if (!authHeader) return res.status(401).send("Access denied.");
+  const token = req.cookies.token; 
+  console.log("Token:", token);
 
-  const token = authHeader && authHeader.split(' ')[1];
-  if (!token) return res.status(401).send("Token missing.");
+  if (!token) return res.redirect('/login.html');
 
   jwt.verify(token, importantKey, (err, user) => {
-    if (err) return res.status(401).send('Invalid token.');
+    if (err) return res.redirect('/login.html');
 
     req.user = user;
     next();
-  });
+  })
 }
 
 function getUsers () {
@@ -93,13 +110,42 @@ app.post('/login', async (req, res) => {
     { expiresIn: '1h' }
   );
 
-  res.json({ token });
+  res.cookie('token', token, {
+    httpOnly: true,
+    secure: false,
+    sameSite: 'Strict',
+    maxAge: 60 * 60 * 1000
+  });
+
+  res.send('Logged in!');
 });
 
-app.get('/dashboard', authenticateToken, (req,res) => {
-  res.send(`Welcome ${req.user.username}`);
+app.post('/logout', (req,res)=>{
+console.log("Cookies before clearing:", req.cookies);
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: false,
+    sameSite: 'Strict',
+    path: '/'
+  });
+
+  res.sendStatus(200);
 });
+
+app.get(['/dashboard','/dashboard/'], authenticateToken, (req,res) => {
+  console.log(req);
+  res.sendFile(path.join(__dirname,'private','dashboard.html'));
+});
+
+app.use((req, res, next) => {
+  console.log('Incoming request:', req.method, req.url);
+  next();
+});
+
+app.use(express.static('public'));
 
 app.listen(3000,() => {
   console.log('Server running on port 3000');
-})
+}).on("error", (err) => {
+  console.error("Server failed to start:", err);
+});
