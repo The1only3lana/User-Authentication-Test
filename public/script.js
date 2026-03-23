@@ -59,6 +59,7 @@ async function login (event) {
         body: JSON.stringify({username,password})
     });
 
+    event.target.reset();
     const text = await response.text();
 
     if(!response.ok) {
