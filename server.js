@@ -95,31 +95,41 @@ function authenticateToken (req, res, next) {
 // Get Users
 function getUsers () {
   try {
-    const data = fs.readFileSync('users.json'); //Reads: users.json
-    return JSON.parse(data);
+    const data = fs.readFileSync('users.json'); //Reads: users.json   RRR
+    return JSON.parse(data); //Returns array: JSON = [ {"username":"john", "password":"hashedpass"}]   RRR
   }
-  catch (err){
+  catch (err){ // If file is missing: JavaScript = return [];   RRR
     return [];
   }
 }
 
 // Save Users
 function saveUsers(users) {
-  fs.writeFileSync("users.json", JSON.stringify(users, null, 2));
-}  //Writes updated users.
+  fs.writeFileSync("users.json", JSON.stringify(users, null, 2)); //Writes updated users.
+}  
 
 // Upon receiving a post request from register, run the following ->
-app.post('/register', async (req, res) => {
+app.post('/register', async (req, res) => {  // Register Route :|: Runs when user submits: "register form"
+
+  // Get Data
   const { password } = req.body;
+
+  //Lowercase usernames: To Prevents duplicates. EX: John → john
   const users = getUsers();
   const username = req.body.username.toLowerCase();
 
+
+  // Validate Input: Rejects empty fields. / requires Username and password   RRR
   if (!username?.trim() || !password?.trim()) return res.status(400).send('Username and password are required.');
+  // No spaces allowed: This Prevent Spaces in the Username
   if (username.includes(' ')) return res.status(400).send('Username cannot contain spaces');
 
-  const userExists = users.find(u => u.username === username);
+  // Check for Existing Users
+  const userExists = users.find(u => u.username === username);  // Check for if the User Exists  
+  //If found: send/said "User already exists"
   if (userExists) return res.status(400).send("User already exists.");
 
+  //Password Length Check
   if (password.trim().length < 6) return res.status(400).send('Password must be at least 6 characters.')
 
   const hashedPassword = await bcrypt.hash(password,10);
