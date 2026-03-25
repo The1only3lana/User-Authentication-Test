@@ -41,7 +41,7 @@ const rateLimit = require('express-rate-limit');
 //Allows us to read cookies (req.cookies).
 const cookieParser = require('cookie-parser');
 
-// Limits how many attempts can be done (10), and how much time you have.
+// Limites how many attempts can be done (10), and how much time you have.
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 Minutes
   max: 10, // 10 Attempts
@@ -50,13 +50,13 @@ const limiter = rateLimit({
   }
 })
 
-// This Creates your server
+// This Creates your server   RRR
 const app = express();
 
 // Middleware Setup: 
 // Middleware = code that runs before routes
-app.use(express.json()); //Allows reading: Without it → body would be empty.
-app.use(cookieParser()); // Is used to parse cookies, and set cookies with security options, as well as clearing cookies. 
+app.use(express.json()); //Allows reading: Without it → body would be empty. RRR
+app.use(cookieParser()); //
 app.use(helmet()); //Adds security headers.
 
 // Sets as the default page
@@ -131,24 +131,30 @@ app.post('/register', async (req, res) => {  // Register Route :|: Runs when use
 
   //Password Length Check
   if (password.trim().length < 6) return res.status(400).send('Password must be at least 6 characters.')  //Checks the length of the Password, to make sure that its a minimum of 6 characters
-
+  //Minimum of 6 characters
+  
   const hashedPassword = await bcrypt.hash(password,10);
-  users.push({username, password: hashedPassword});
+  users.push({username, password: hashedPassword}); 
 
-  saveUsers(users);
-  res.send('User registered!');
+
+  saveUsers(users);    // Adds/pushes User to file.
+  res.send('User registered!');   //Send Response
 });
 
-app.post('/login', async (req, res) => {
+
+//Login Route
+app.post('/login', async (req, res) => {     //Runs when logging in.
   const { password } = req.body;
   const username = req.body.username.toLowerCase();
 
+  //Find User
   const users = getUsers();
   const user = users.find(u => u.username === username);
 
-  if (!username?.trim() || !password?.trim()) return res.status(400).send('Username and password required.')
 
-  if (!user) return res.status(401).send('Invalid credentials.');
+  if (!username?.trim() || !password?.trim()) return res.status(400).send('Username and password required.')  // If found:
+
+  if (!user) return res.status(401).send('Invalid credentials.');  // If not found:
 
   const valid = await bcrypt.compare(password, user.password)
   if (!valid) return res.status(401).send('Invalid credentials.');
