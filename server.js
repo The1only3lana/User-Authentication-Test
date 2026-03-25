@@ -41,7 +41,7 @@ const rateLimit = require('express-rate-limit');
 //Allows us to read cookies (req.cookies).
 const cookieParser = require('cookie-parser');
 
-// Limites how many attempts can be done (10), and how much time you have.
+// Limits how many attempts can be done (10), and how much time you have.
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 Minutes
   max: 10, // 10 Attempts
@@ -50,13 +50,13 @@ const limiter = rateLimit({
   }
 })
 
-// This Creates your server   RRR
+// This Creates your server
 const app = express();
 
 // Middleware Setup: 
 // Middleware = code that runs before routes
-app.use(express.json()); //Allows reading: Without it → body would be empty. RRR
-app.use(cookieParser()); //
+app.use(express.json()); //Allows reading: Without it → body would be empty.
+app.use(cookieParser()); // Is used to parse cookies, and set cookies with security options, as well as clearing cookies. 
 app.use(helmet()); //Adds security headers.
 
 // Sets as the default page
