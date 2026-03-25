@@ -55,9 +55,15 @@ const app = express();
 
 // Middleware Setup: 
 // Middleware = code that runs before routes
+<<<<<<< HEAD
 app.use(express.json()); //Allows reading: Without it → body would be empty. RRR
 app.use(cookieParser()); //
 app.use(helmet()); //Adds security headers.
+=======
+app.use(express.json()); //Allows reading: Without it → body would be empty.
+app.use(cookieParser()); // Is used to parse cookies, and set cookies with security options, as well as clearing cookies. 
+app.use(helmet());
+>>>>>>> 131ac7d852bed09e57e60671357e1029f21a47ea
 
 // Sets as the default page
 app.get('/', (req,res)=>{
@@ -65,11 +71,11 @@ app.get('/', (req,res)=>{
 });
 
 // Sets the attempt limiters.   
-// This Limits requests to: /register & /login. Not to other routes.   RRR
+// This Limits requests to: /register & /login. Not to other routes.
 app.use('/register', limiter);
 app.use('/login', limiter);
 
-// Secret Key Check: Stops server if secret key missing.  RRR
+// Secret Key Check: Stops server if secret key missing.
 // Good security practice.
 const importantKey = process.env.JWT_SECRET;
 if (!importantKey) {
@@ -77,14 +83,14 @@ if (!importantKey) {
   process.exit(1);
 }
 
-// Token Authentication Function: This protects private routes.  RRR
+// Token Authentication Function: This protects private routes. 
 function authenticateToken (req, res, next) {
-  const token = req.cookies.token; //1)Get Token: Reads cookie
+  const token = req.cookies.token; //1) Get Token: Reads cookie
 
-  if (!token) return res.redirect('/login.html'); //2)If No Token: (Not logged in → redirect)
+  if (!token) return res.redirect('/login.html'); //2) If No Token: (Not logged in → redirect)
 
   jwt.verify(token, importantKey, (err, user) => { //Verify Token 3) Checks if token: Is valid & Was created by your server
-    if (err) return res.redirect('/login.html'); //4)If Invalid: Reject user.
+    if (err) return res.redirect('/login.html'); //4) If Invalid: Reject user.
 
     req.user = user;
     next(); //5)If Valid: Stores user info and continues.
@@ -95,21 +101,21 @@ function authenticateToken (req, res, next) {
 // Get Users
 function getUsers () {
   try {
-    const data = fs.readFileSync('users.json'); //Reads: users.json   RRR
+    const data = fs.readFileSync('users.json'); //Reads: users.json
     return JSON.parse(data); //Returns array: JSON = [ {"username":"john", "password":"hashedpass"}]   RRR
   }
-  catch (err){ // If file is missing: JavaScript = return [];   RRR
+  catch (err){ // If file is missing: Returns an empty array.
     return [];
   }
 }
 
 // Save Users
 function saveUsers(users) {
-  fs.writeFileSync("users.json", JSON.stringify(users, null, 2)); //Writes updated users.
+  fs.writeFileSync("users.json", JSON.stringify(users, null, 2)); //Sets the users in the JSON file.
 }  
 
 // Upon receiving a post request from register, run the following ->
-app.post('/register', async (req, res) => {  // Register Route :|: Runs when user submits: "register form"
+app.post('/register', async (req, res) => {  // Runs when user submits the Register form.
 
   // Get Data
   const { password } = req.body;
@@ -117,7 +123,6 @@ app.post('/register', async (req, res) => {  // Register Route :|: Runs when use
   //Lowercase usernames: To Prevents duplicates. EX: John → john
   const users = getUsers();
   const username = req.body.username.toLowerCase();
-
 
   // Validate Input: Rejects empty fields. / requires Username and password   RRR
   if (!username?.trim() || !password?.trim()) return res.status(400).send('Username and password are required.');
@@ -167,7 +172,7 @@ app.post('/login', async (req, res) => {     //Runs when logging in.
 
   res.cookie('token', token, {
     httpOnly: true,
-    secure: false, // Should change to true in actual production, this is just a test
+    secure: process.env.NODE_ENV === 'production', // Only over HTTPS
     sameSite: 'Strict',
     maxAge: 60 * 60 * 1000 // 1 Hour
   });
@@ -178,7 +183,7 @@ app.post('/login', async (req, res) => {     //Runs when logging in.
 app.post('/logout', (req,res)=>{
   res.clearCookie('token', {
     httpOnly: true,
-    secure: false,
+    secure: process.env.NODE_ENV === 'production', // Only over HTTPS
     sameSite: 'Strict',
     path: '/'
   });
