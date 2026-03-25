@@ -55,15 +55,9 @@ const app = express();
 
 // Middleware Setup: 
 // Middleware = code that runs before routes
-<<<<<<< HEAD
 app.use(express.json()); //Allows reading: Without it → body would be empty. RRR
 app.use(cookieParser()); //
 app.use(helmet()); //Adds security headers.
-=======
-app.use(express.json()); //Allows reading: Without it → body would be empty.
-app.use(cookieParser()); // Is used to parse cookies, and set cookies with security options, as well as clearing cookies. 
-app.use(helmet());
->>>>>>> 131ac7d852bed09e57e60671357e1029f21a47ea
 
 // Sets as the default page
 app.get('/', (req,res)=>{
@@ -138,7 +132,11 @@ app.post('/register', async (req, res) => {  // Runs when user submits the Regis
   if (password.trim().length < 6) return res.status(400).send('Password must be at least 6 characters.')  //Checks the length of the Password, to make sure that its a minimum of 6 characters
   //Minimum of 6 characters
   
-  const hashedPassword = await bcrypt.hash(password,10);
+  //10 = salt rounds (security level).  This makes the password hard to crack while keeping your app fast.
+  const hashedPassword = await bcrypt.hash(password,10);  //In bcrypt, the number 10 (often called saltRounds) represents the cost factor, which determines the computational effort required to hash the password.
+  //Here it tells the algorithm to run 1,024 iterations. RRR
+
+  //Save User
   users.push({username, password: hashedPassword}); 
 
 
@@ -154,34 +152,39 @@ app.post('/login', async (req, res) => {     //Runs when logging in.
 
   //Find User
   const users = getUsers();
-  const user = users.find(u => u.username === username);
+  const user = users.find(u => u.username === username);  //Find User
 
 
   if (!username?.trim() || !password?.trim()) return res.status(400).send('Username and password required.')  // If found:
 
   if (!user) return res.status(401).send('Invalid credentials.');  // If not found:
 
-  const valid = await bcrypt.compare(password, user.password)
+  //Check Password
+  const valid = await bcrypt.compare(password, user.password)  //Compares: typed password vs hashed password
   if (!valid) return res.status(401).send('Invalid credentials.');
 
-  const token = jwt.sign(
+  //Create Token
+  const token = jwt.sign(  //Token contains: JSON = { "username":"john" }   RRR
     {username },
-    importantKey,
-    { expiresIn: '1h' }
+    importantKey,    //Signed using: JWT_SECRET    RRR
+    { expiresIn: '1h' }  //This Token will Expire in: 1 hour
   );
 
-  res.cookie('token', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // Only over HTTPS
-    sameSite: 'Strict',
-    maxAge: 60 * 60 * 1000 // 1 Hour
+  //Store Token in Cookie    RRR
+  res.cookie('token', token, {   //Saves token in browser cookie.
+    //Cookie Settings
+    httpOnly: true,   //JavaScript cannot read cookie. //(Protects against XSS.)   RRR   RRR   RRR
+    secure: process.env.NODE_ENV === 'production', // Only over HTTPS     //Meaning: HTTPS only in production | This is a Very good practice  RRR
+    sameSite: 'Strict',   //Prevents: Cross-site attacks
+    maxAge: 60 * 60 * 1000 //Expires in: 1 Hour
   });
 
   res.send('Logged in!');
 });
 
-app.post('/logout', (req,res)=>{
-  res.clearCookie('token', {
+//Logout Route
+app.post('/logout', (req,res)=>{   //Clears cookie:
+  res.clearCookie('token', {   //User logged out.
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production', // Only over HTTPS
     sameSite: 'Strict',
@@ -191,17 +194,22 @@ app.post('/logout', (req,res)=>{
   res.sendStatus(200);
 });
 
-app.get(['/dashboard','/dashboard/'], authenticateToken, (req,res) => {
-  res.sendFile(path.join(__dirname,'private','dashboard.html'));
+//Protected Dashboard
+app.get(['/dashboard','/dashboard/'], authenticateToken, (req,res) => {   //This route requires (login): "authenticateToken" Runs first: So No token → redirect Valid token → allow access  RRR
+  //Send Dashboard
+  res.sendFile(path.join(__dirname,'private','dashboard.html')); //Only logged-in users see this page.
 });
 
-app.get('/api/user', authenticateToken, (req, res) => {
+//API User Route
+app.get('/api/user', authenticateToken, (req, res) => {  //Useful for: 1)Showing username. 2)Personalizing UI
   res.json({ username: req.user.username });
 });
 
+//Static Files
 app.use(express.static('public'));
 
-app.listen(3000,() => {
+///Start Server
+app.listen(3000,() => {  //Server runs at: http://localhost:3000
   console.log('Server running on port 3000');
 }).on("error", (err) => {
   console.error("Server failed to start:", err);
