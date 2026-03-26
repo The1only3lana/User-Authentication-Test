@@ -197,7 +197,7 @@ app.post('/logout', (req,res)=>{   //Clears cookie:
 //Protected Dashboard
 app.get(['/dashboard','/dashboard/'], authenticateToken, (req,res) => {   //This route requires (login): "authenticateToken" Runs first: So No token → redirect Valid token → allow access  RRR
   //Send Dashboard
-  res.sendFile(path.join(__dirname,'frontend/private','dashboard.html')); //Only logged-in users see this page.
+  res.sendFile(path.join(__dirname,'private','dashboard.html')); //Only logged-in users see this page.
 });
 
 //API User Route
@@ -211,7 +211,6 @@ app.use(express.static(path.join(__dirname, 'frontend/public')));
 ///Start Server
 app.listen(3000,() => {  //Server runs at: http://localhost:3000
   console.log('Server running on port 3000');
-  //Error Handling
-}).on("error", (err) => {  //If server fails → logs error.
+}).on("error", (err) => {
   console.error("Server failed to start:", err);
 });
