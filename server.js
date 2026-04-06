@@ -206,7 +206,7 @@ app.get('/api/user', authenticateToken, (req, res) => {  //Useful for: 1)Showing
 });
 
 //Serve static files from the 'public' directory, lets us not have to trype in the FULL directory for files in the public folder.
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'frontend/public')));
 
 ///Start Server
 app.listen(3000,() => {  //Server runs at: http://localhost:3000

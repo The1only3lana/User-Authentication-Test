@@ -1,36 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
-    <link rel="stylesheet" type="text/css" href="styles/main.css"/>
-    <link rel="stylesheet" type="text/css" href="styles/reset.css"/>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In</title>
+    <link rel="stylesheet" href="styles/main.css" />
 </head>
 <body>
+
     <header>
-        <h1>- Login -</h1>
+        <h1 class="main-heading">- Login -</h1>
     </header>
 
-    <main>
-        <form id="loginForm">
-            <h2>Sign in:</h2>
-            <div class="input-container">
-                <label for="usernameInput">Username:</label>
-                <input id="usernameInput" name="username" placeholder="Username" autocomplete="new-password"/>
+    <div class="page">
+        <div class="bg-grid"></div>
+        <div class="bg-scan"></div>
 
-                <label for="passwordInput">Password:</label>
-                <input type="password" id="passwordInput" name="password" placeholder="Password" autocomplete="new-password"/>
-            </div>
-    
-            <button type="submit">Login</button>
+        <div class="signin-card-wrap">
+            <div class="signin-card-border"></div>
 
-            <nav>
-                <p>Don't have an account? <a href="register.html">Register</a></p>
-            </nav>
-        </form>
-    </main>
+            <section class="signin-card" id="signinCard">
+                <div class="card-scan"></div>
 
+                <div class="signin-content">
+                    <div class="signin-header">
+                        <p class="system-label">Secure Login</p>
+                        <h1>Sign In</h1>
+                        <p class="subtitle">Enter your credentials to access the system</p>
+                    </div>
+
+                    <form id="loginForm" class="signin-form">
+                        <div class="input-stack">
+                            <div class="input-group">
+                                <input
+                                    type="text"
+                                    id="usernameInput"
+                                    name="username"
+                                    placeholder="Username"
+                                    autocomplete="username"
+                                    required
+                                />
+                            </div>
+
+                            <div class="input-group password-group">
+                                <input
+                                    type="password"
+                                    id="passwordInput"
+                                    name="password"
+                                    placeholder="Password"
+                                    autocomplete="current-password"
+                                    required
+                                />
+                                <button type="button" id="togglePasswordBtn" class="toggle-password-btn">
+                                    View
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="signin-options">
+                            <label class="remember-row">
+                                <input type="checkbox" name="remember" />
+                                <span>Remember me</span>
+                            </label>
+
+                            <a href="#" class="forgot-link">Forgot?</a>
+                        </div>
+
+                        <button type="submit" id="loginBtn" class="signin-btn">Sign In</button>
+
+                        <p class="register-copy">
+                            Don't have an account?
+                            <a href="register.html">Register</a>
+                        </p>
+
+                        <div class="terminal-box">
+                            <span id="terminalText"></span>
+                            <span id="terminalCursor" class="terminal-cursor"></span>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+
+const loginForm = document.getElementById("loginForm");
+const signinCard = document.getElementById("signinCard");
+const passwordInput = document.getElementById("passwordInput");
+const togglePasswordBtn = document.getElementById("togglePasswordBtn");
+const loginBtn = document.getElementById("loginBtn");
+const terminalText = document.getElementById("terminalText");
+const terminalCursor = document.getElementById("terminalCursor");
+
+if (togglePasswordBtn && passwordInput) {
+    togglePasswordBtn.addEventListener("click", () => {
+        const isPassword = passwordInput.type === "password";
+        passwordInput.type = isPassword ? "text" : "password";
+        togglePasswordBtn.textContent = isPassword ? "Hide" : "View";
+    });
+}
+
+if (loginForm) {
+    loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const username = document.getElementById("usernameInput").value.trim();
+        const password = passwordInput.value;
+
+        setLoginButtonState("Processing...", true, "processing");
+        setTerminalText("");
+        showCursor();
+
+        try {
+            await typeTerminalMessage("Authenticating...", 90);
+
+            // Replace this with your real login request if needed
+            await fakeLogin(username, password);
+
+            setTerminalText("Access Granted ✔");
+            hideCursor();
+            setLoginButtonState("Access Granted", true, "granted");
+
+            if (signinCard) {
+                signinCard.classList.add("granted");
+            }
+
+            loginForm.reset();
+
+            setTimeout(() => {
+                // Change this to your real dashboard page
+                window.location.href = "Dummy.html";
+            }, 1200);
+        } catch (error) {
+            setTerminalText(error.message || "Access Denied");
+            hideCursor();
+            setLoginButtonState("Login Failed", false, "error");
+        }
+    });
+}
+
+function setTerminalText(message) {
+    if (terminalText) {
+        terminalText.textContent = message;
+    }
+}
+
+function showCursor() {
+    if (terminalCursor) {
+        terminalCursor.classList.remove("hidden");
+    }
+}
+
+function hideCursor() {
+    if (terminalCursor) {
+        terminalCursor.classList.add("hidden");
+    }
+}
+
+function setLoginButtonState(text, disabled = false, state = "") {
+    if (!loginBtn) return;
+
+    loginBtn.textContent = text;
+    loginBtn.disabled = disabled;
+    loginBtn.classList.remove("processing", "granted", "error");
+
+    if (state) {
+        loginBtn.classList.add(state);
+    }
+}
+
+function typeTerminalMessage(message, speed = 90) {
+    return new Promise((resolve) => {
+        if (!terminalText) {
+            resolve();
+            return;
+        }
+
+        terminalText.textContent = "";
+        showCursor();
+
+        let index = 0;
+
+        const interval = setInterval(() => {
+            terminalText.textContent = message.slice(0, index + 1);
+            index++;
+
+            if (index >= message.length) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, speed);
+    });
+}
+
+function fakeLogin(username, password) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if (username && password) {
+                resolve();
+            } else {
+                reject(new Error("Access Denied"));
+            }
+        }, 600);
+    });
+}
+
+    </script>
     <script src="script.js"></script>
 </body>
 </html>

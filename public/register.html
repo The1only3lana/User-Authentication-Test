@@ -3,33 +3,384 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>Register Sign Up</title>
     <link rel="stylesheet" type="text/css" href="styles/main.css"/>
     <link rel="stylesheet" type="text/css" href="styles/reset.css"/>
+    <link rel="stylesheet" href="register.css"/>
 </head>
 <body>
     <header>
-        <h1>- Register -</h1>
+        <h1 class="main-heading">- Register -</h1>
     </header>
 
-    <main>
-        <form id="registerForm">
-            <h2>Sign up:</h2>
-            <div class="input-container">
-                <label for="usernameInput">Username:</label>
-                <input id="usernameInput" name="username" placeholder="Username" autocomplete="new-password"/>
+     <div class="page">
+        <!-- Background visual effects -->
+        <div class="bg-grid"></div> <!-- Grid overlay -->
+        <div class="bg-scan"></div> <!-- Scanline animation -->
+        <div class="glow glow-1"></div> <!-- Glow effect -->
+        <div class="glow glow-2"></div>
 
-                <label for="passwordInput">Password:</label>
-                <input type="password" id="passwordInput" name="password" placeholder="Password" autocomplete="new-password"/>
-            </div>
-    
-            <button type="submit">Register</button>
+        <main class="login-shell">
+            <!-- Decorative border around login panel -->
+            <div class="shell-border"></div>
 
-            <nav>
-                <p>Already have an account? <a href="login.html">Sign in</a></p>
-            </nav>
-        </form>
-    </main>
+            <section class="login-panel">
+                <!-- More visual effects -->
+                <div class="panel-scan"></div>
+                <div class="panel-line top"></div>
+                <div class="panel-line left"></div>
+                <div class="panel-line right"></div>
+
+                <div class="panel-content">
+                    <!-- Header section -->
+                    <div class="login-header">
+                        <div class="header-text">
+                            <!-- Title text -->
+                            <p class="system-label">System Access</p>
+                            <h1>~ Sign up ~</h1>
+                            <p class="subtitle">Secure authentication required</p>
+                        </div>
+
+                        <!-- Animated orb -->
+                        <div class="header-orb">
+                            <div class="orb-core"></div>
+                        </div>
+                    </div>
+
+                    <!-- Status indicator -->
+                    <div class="status-box">
+                        <span>Identity Verification</span>
+                        <span class="online">Online</span>
+                    </div>
+
+                    <!-- LOGIN / REGISTER FORM -->
+                    <form id="loginForm" class="login-form">
+                        
+                        <!-- Username input -->
+                        <div class="input-group">
+                            <label for="usernameInput">Username</label>
+                            <input
+                                type="text"
+                                id="usernameInput"
+                                name="username"
+                                placeholder="Enter your username"
+                                autocomplete="username"
+                                required
+                            />
+                        </div>
+
+                        <!-- Password input -->
+                        <div class="input-group">
+                            <label for="passwordInput">Password</label>
+                            <div class="password-wrap">
+                                <input
+                                    type="password"
+                                    id="passwordInput"
+                                    name="password"
+                                    placeholder="Enter your password"
+                                    autocomplete="current-password"
+                                    required
+                                />
+
+                                <!-- Button to toggle password visibility -->
+                                <button type="button" class="view-btn" aria-label="View password">
+                                    View
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Remember me + recovery -->
+                        <div class="login-options">
+                            <label class="remember">
+                                <input type="checkbox" name="remember" />
+                                <span>Remember me</span>
+                            </label>
+
+                            <a href="#" class="recovery-link">Recovery</a>
+                        </div>
+
+                        <!-- Submit button -->
+                        <button type="submit" id="loginBtn" class="signin-btn">
+                            Initialize Sign up
+                        </button>
+
+                        <!-- Link to login page -->
+                        <p class="register-copy">
+                            Already have an account?
+                            <a href="login.html">Login</a>
+                        </p>
+
+                        <!-- Terminal-style typing display -->
+                        <div class="terminal-box">
+                            <span id="terminalText"></span>
+                            <span class="cursor" id="terminalCursor"></span>
+                        </div>
+
+                        <!-- Footer info -->
+                        <div class="panel-footer">
+                            <span>Threat Shield Active</span>
+                            <span>v8.7</span>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // ===============================
+        // GET ELEMENTS FROM THE PAGE
+        // ===============================
+
+        const registerForm = document.getElementById("registerForm"); // Register form (if exists)
+        const loginForm = document.getElementById("loginForm"); // Login form
+        const logoutButton = document.getElementById("logoutButton"); // Logout button
+        const loadDashboardButton = document.getElementById("loadDataButton"); // Load user data button
+
+        const loginPanel = document.getElementById("loginPanel"); // Main panel container
+        const passwordInput = document.getElementById("passwordInput"); // Password input field
+        const viewPasswordBtn = document.getElementById("viewPasswordBtn"); // Toggle password button
+        const loginBtn = document.getElementById("loginBtn"); // Submit button
+        const terminalText = document.getElementById("terminalText"); // Terminal output text
+        const terminalCursor = document.getElementById("terminalCursor"); // Blinking cursor
+
+        // ===============================
+        // EVENT LISTENERS
+        // ===============================
+
+        // When register form is submitted
+        if (registerForm) {
+            registerForm.addEventListener("submit", (event) => {
+                register(event);
+            });
+        }
+
+        // When login form is submitted
+        if (loginForm) {
+            loginForm.addEventListener("submit", (event) => {
+                login(event);
+            });
+        }
+
+        // Logout click
+        if (logoutButton) {
+            logoutButton.addEventListener("click", logout);
+        }
+
+        // Load dashboard data
+        if (loadDashboardButton) {
+            loadDashboardButton.addEventListener("click", loadUser);
+        }
+
+        // Toggle password visibility
+        if (viewPasswordBtn && passwordInput) {
+            viewPasswordBtn.addEventListener("click", togglePasswordVisibility);
+        }
+
+        // ===============================
+        // UI FUNCTIONS
+        // ===============================
+
+        // Show/hide password text
+        function togglePasswordVisibility() {
+            const isPassword = passwordInput.type === "password";
+
+            // Switch between text and password
+            passwordInput.type = isPassword ? "text" : "password";
+
+            // Change button text
+            viewPasswordBtn.textContent = isPassword ? "Hide" : "View";
+        }
+
+        // Set terminal message instantly
+        function setTerminalText(message) {
+            if (terminalText) {
+                terminalText.textContent = message;
+            }
+        }
+
+        // Show blinking cursor
+        function showCursor() {
+            if (terminalCursor) {
+                terminalCursor.classList.remove("hidden");
+            }
+        }
+
+        // Hide cursor
+        function hideCursor() {
+            if (terminalCursor) {
+                terminalCursor.classList.add("hidden");
+            }
+        }
+
+        // Change login button appearance/state
+        function setLoginButtonState(text, disabled = false, state = "") {
+            if (!loginBtn) return;
+
+            loginBtn.textContent = text; // Change button text
+            loginBtn.disabled = disabled; // Enable/disable button
+
+            // Remove previous states
+            loginBtn.classList.remove("processing", "granted", "error");
+
+            // Add new state (CSS class)
+            if (state) {
+                loginBtn.classList.add(state);
+            }
+        }
+
+        // Typewriter animation for terminal text
+        function typeTerminalMessage(message, speed = 90) {
+            return new Promise((resolve) => {
+                if (!terminalText) {
+                    resolve();
+                    return;
+                }
+
+                terminalText.textContent = "";
+                showCursor();
+
+                let index = 0;
+
+                const interval = setInterval(() => {
+                    // Show text one character at a time
+                    terminalText.textContent = message.slice(0, index + 1);
+                    index++;
+
+                    // Stop when done
+                    if (index >= message.length) {
+                        clearInterval(interval);
+                        resolve();
+                    }
+                }, speed);
+            });
+        }
+
+        // ===============================
+        // AUTH FUNCTIONS
+        // ===============================
+
+        // REGISTER USER
+        async function register(event) {
+            event.preventDefault(); // Stop page reload
+
+            const username = document.getElementById("usernameInput").value;
+            const password = document.getElementById("passwordInput").value;
+
+            // Send data to backend
+            const response = await fetch("http://localhost:3000/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const text = await response.text();
+
+            // If error
+            if (!response.ok) {
+                alert(text);
+                return;
+            }
+
+            // Redirect to login page
+            window.location.replace("login.html");
+        }
+
+        // LOGIN USER
+        async function login(event) {
+            event.preventDefault();
+
+            const username = document.getElementById("usernameInput").value;
+            const password = document.getElementById("passwordInput").value;
+
+            // Show loading state
+            setLoginButtonState("Processing...", true, "processing");
+            setTerminalText("");
+            showCursor();
+
+            try {
+                // Fake typing effect
+                await typeTerminalMessage("Authenticating...", 90);
+
+                // Send login request
+                const response = await fetch("http://localhost:3000/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ username, password })
+                });
+
+                const text = await response.text();
+
+                // If login failed
+                if (!response.ok) {
+                    setTerminalText(text || "Access Denied");
+                    hideCursor();
+                    setLoginButtonState("Login Failed", false, "error");
+                    return;
+                }
+
+                // Success
+                setTerminalText("Access Granted ✔");
+                hideCursor();
+                setLoginButtonState("Access Granted", true, "granted");
+
+                // Add visual success effect
+                if (loginPanel) {
+                    loginPanel.classList.add("granted");
+                }
+
+                event.target.reset(); // Clear form
+
+                // Redirect to dashboard
+                setTimeout(() => {
+                    window.location.replace("/dashboard");
+                }, 1200);
+
+            } catch (error) {
+                console.error(error);
+
+                // Handle connection 
+                setTerminalText("Connection Granted");
+                hideCursor();
+                setLoginButtonState("System Connected", false, "error");
+            }
+
+        }
+
+        // LOAD USER DATA
+        async function loadUser() {
+            const res = await fetch("/api/user", {
+                credentials: "include"
+            });
+
+            // If not logged in
+            if (!res.ok) {
+                window.location.replace("/login.html");
+                return;
+            }
+
+            const data = await res.json();
+            const username = data?.username || "User";
+
+            // Display username
+            document.getElementById("result").innerText = `Welcome ${username}`;
+        }
+
+        // LOGOUT USER
+        async function logout() {
+            await fetch("/logout", {
+                method: "POST",
+                credentials: "include"
+            });
+
+            // Redirect to login
+            window.location.replace("/login.html");
+        }
+
+    </script>
 
     <script src="script.js"></script>
 </body>

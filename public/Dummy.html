@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>J.A.R.V.I.S. Home</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-1: #030712;
+      --bg-2: #0b1120;
+      --panel: rgba(10, 18, 35, 0.72);
+      --panel-border: rgba(120, 170, 255, 0.22);
+      --text: #e6f1ff;
+      --muted: #8fa8c7;
+      --glow: #6ee7ff;
+      --glow-soft: rgba(110, 231, 255, 0.32);
+      --accent: #7c3aed;
+      --accent-soft: rgba(124, 58, 237, 0.26);
+      --success: #5ef2a5;
+      --warning: #ffd166;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.18), transparent 35%),
+        radial-gradient(circle at 80% 25%, rgba(110, 231, 255, 0.14), transparent 30%),
+        radial-gradient(circle at 50% 80%, rgba(59, 130, 246, 0.12), transparent 35%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.03) 0px,
+        rgba(255, 255, 255, 0.03) 1px,
+        transparent 2px,
+        transparent 6px
+      );
+      opacity: 0.18;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(40px);
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 0;
+      animation: drift 12s ease-in-out infinite alternate;
+    }
+
+    .orb.one {
+      width: 220px;
+      height: 220px;
+      background: var(--glow-soft);
+      top: 8%;
+      left: 6%;
+    }
+
+    .orb.two {
+      width: 260px;
+      height: 260px;
+      background: var(--accent-soft);
+      right: 5%;
+      bottom: 8%;
+      animation-duration: 14s;
+    }
+
+    @keyframes drift {
+      from { transform: translateY(-10px) translateX(0px) scale(1); }
+      to { transform: translateY(20px) translateX(10px) scale(1.08); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: min(1280px, 94%);
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding: 14px 18px;
+      border: 1px solid var(--panel-border);
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+      border-radius: 22px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.28);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .core {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(110,231,255,0.95) 10%, rgba(59,130,246,0.9) 28%, rgba(30,41,59,0.2) 48%, transparent 64%),
+        radial-gradient(circle, rgba(124,58,237,0.6), transparent 70%);
+      box-shadow:
+        0 0 18px rgba(110, 231, 255, 0.7),
+        0 0 36px rgba(124, 58, 237, 0.35);
+      animation: pulse 2.5s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 18px rgba(110, 231, 255, 0.7), 0 0 36px rgba(124, 58, 237, 0.35); }
+      50% { transform: scale(1.08); box-shadow: 0 0 28px rgba(110, 231, 255, 0.95), 0 0 52px rgba(124, 58, 237, 0.5); }
+    }
+
+    .brand h1 {
+      font-size: 1.35rem;
+      letter-spacing: 0.18rem;
+      font-weight: 700;
+    }
+
+    .brand p,
+    .meta,
+    .subtle,
+    .stat-label,
+    .card small {
+      color: var(--muted);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .status-pill,
+    .chip,
+    .action-btn {
+      border: 1px solid var(--panel-border);
+      background: rgba(9, 16, 30, 0.72);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 0.92rem;
+    }
+
+    .status-pill {
+      box-shadow: inset 0 0 18px rgba(110, 231, 255, 0.06);
+    }
+
+    .dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 12px var(--success);
+      animation: blink 1.8s infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.45; }
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 22px;
+      margin-bottom: 22px;
+    }
+
+    .panel {
+      border: 1px solid var(--panel-border);
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.24);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent, rgba(255,255,255,0.04), transparent);
+      transform: translateX(-100%);
+      animation: sheen 6s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes sheen {
+      to { transform: translateX(100%); }
+    }
+
+    .hero h2 {
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      line-height: 1.05;
+      margin-bottom: 14px;
+      letter-spacing: 0.04rem;
+    }
+
+    .hero h2 span {
+      color: var(--glow);
+      text-shadow: 0 0 18px rgba(110, 231, 255, 0.55);
+    }
+
+    .hero p {
+      color: var(--muted);
+      max-width: 62ch;
+      font-size: 1rem;
+      margin-bottom: 24px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 26px;
+    }
+
+    .primary,
+    .secondary {
+      border: none;
+      cursor: pointer;
+      padding: 12px 18px;
+      border-radius: 16px;
+      font-weight: 600;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .primary {
+      color: #07111f;
+      background: linear-gradient(135deg, var(--glow), #93c5fd);
+      box-shadow: 0 0 20px rgba(110, 231, 255, 0.35);
+    }
+
+    .secondary {
+      color: var(--text);
+      background: rgba(13, 22, 40, 0.9);
+      border: 1px solid var(--panel-border);
+    }
+
+    .primary:hover,
+    .secondary:hover,
+    .action-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stat {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(6, 14, 28, 0.78);
+      border: 1px solid rgba(125, 160, 255, 0.16);
+    }
+
+    .stat-value {
+      display: block;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .radar {
+      display: grid;
+      place-items: center;
+      min-height: 100%;
+    }
+
+    .radar-shell {
+      width: min(360px, 100%);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      position: relative;
+      background:
+        radial-gradient(circle, rgba(110, 231, 255, 0.14), transparent 60%),
+        repeating-radial-gradient(circle, rgba(110, 231, 255, 0.16) 0 2px, transparent 2px 42px),
+        linear-gradient(180deg, rgba(0,0,0,0.08), rgba(255,255,255,0.02));
+      border: 1px solid rgba(110, 231, 255, 0.22);
+      box-shadow: inset 0 0 40px rgba(110, 231, 255, 0.08), 0 0 25px rgba(110, 231, 255, 0.12);
+      overflow: hidden;
+    }
+
+    .radar-shell::before,
+    .radar-shell::after {
+      content: "";
+      position: absolute;
+      inset: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(110, 231, 255, 0.16);
+    }
+
+    .radar-shell::before {
+      width: 1px;
+      height: 100%;
+    }
+
+    .radar-shell::after {
+      width: 100%;
+      height: 1px;
+    }
+
+    .sweep {
+      position: absolute;
+      inset: 0;
+      background: conic-gradient(from 0deg, transparent 0deg, rgba(110,231,255,0.02) 280deg, rgba(110,231,255,0.5) 330deg, rgba(110,231,255,0.02) 360deg);
+      animation: rotate 4s linear infinite;
+      mix-blend-mode: screen;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .radar-core {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--glow);
+      box-shadow: 0 0 24px rgba(110, 231, 255, 0.85);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 22px;
+    }
+
+    .col-4 { grid-column: span 4; }
+    .col-5 { grid-column: span 5; }
+    .col-7 { grid-column: span 7; }
+    .col-8 { grid-column: span 8; }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .section-title h3 {
+      font-size: 1.05rem;
+      letter-spacing: 0.08rem;
+    }
+
+    .cards {
+      display: grid;
+      gap: 14px;
+    }
+
+    .card {
+      padding: 16px;
+      border-radius: 20px;
+      background: rgba(7, 14, 28, 0.85);
+      border: 1px solid rgba(125, 160, 255, 0.14);
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(110, 231, 255, 0.28);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+    }
+
+    .card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+
+    .task-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .task {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(7, 14, 28, 0.82);
+      border: 1px solid rgba(125, 160, 255, 0.14);
+    }
+
+    .task-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .check {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid var(--glow);
+      box-shadow: 0 0 10px rgba(110,231,255,0.24);
+    }
+
+    .bar-wrap {
+      display: grid;
+      gap: 14px;
+    }
+
+    .bar-item label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      color: var(--muted);
+    }
+
+    .bar {
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+      border: 1px solid rgba(125, 160, 255, 0.1);
+    }
+
+    .fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--glow));
+      box-shadow: 0 0 16px rgba(110, 231, 255, 0.28);
+      animation: expand 1.6s ease;
+    }
+
+    @keyframes expand {
+      from { width: 0; }
+    }
+
+    .footer-note {
+      margin-top: 22px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .typing::after {
+      content: "_";
+      animation: caret 1s steps(1) infinite;
+    }
+
+    @keyframes caret {
+      50% { opacity: 0; }
+    }
+
+    @media (max-width: 1080px) {
+      .hero,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .col-4, .col-5, .col-7, .col-8 {
+        grid-column: auto;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .topbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .topbar-right {
+        justify-content: flex-start;
+      }
+
+      .panel {
+        padding: 20px;
+        border-radius: 22px;
+      }
+
+      .quick-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h2 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb one"></div>
+  <div class="orb two"></div>
+
+  <div class="container">
+    <header class="topbar">
+      <div class="brand">
+        <div class="core"></div>
+        <div>
+          <h1>J.A.R.V.I.S.</h1>
+          <p>Just A Rather Very Intelligent System</p>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="status-pill"><span class="dot"></span>System Online</div>
+        <div class="chip" id="liveTime">00:00:00</div>
+        <button class="action-btn" id="themeToggle">Interface Shift</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="panel">
+        <p class="meta">HOME INTERFACE // AI OPERATIONS</p>
+        <h2>Welcome back, <span>Sir</span>.</h2>
+        <p>
+          Your central command interface is active. Monitor system health, review current objectives,
+          and access mission-critical controls from one streamlined J.A.R.V.I.S. dashboard.
+        </p>
+
+        <div class="actions">
+          <button class="primary" id="scanBtn">Run System Scan</button>
+          <button class="secondary" id="protocolBtn">Open Protocols</button>
+        </div>
+
+        <div class="quick-stats">
+          <div class="stat">
+            <span class="stat-value" id="powerValue">98%</span>
+            <span class="stat-label">Power Core Stability</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="threatValue">Low</span>
+            <span class="stat-label">Threat Assessment</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value typing" id="statusText">Awaiting Commands</span>
+            <span class="stat-label">Assistant Status</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel radar">
+        <div class="radar-shell">
+          <div class="sweep"></div>
+          <div class="radar-core"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="panel col-4">
+        <div class="section-title">
+          <h3>MODULES</h3>
+          <span class="subtle">Primary Access</span>
+        </div>
+        <div class="cards">
+          <div class="card">
+            <small>01</small>
+            <strong>System Diagnostics</strong>
+            <span class="subtle">Review hardware, signal integrity, and network response.</span>
+          </div>
+          <div class="card">
+            <small>02</small>
+            <strong>Mission Control</strong>
+            <span class="subtle">Track active tasks, scheduled actions, and operator priorities.</span>
+          </div>
+          <div class="card">
+            <small>03</small>
+            <strong>Security Matrix</strong>
+            <span class="subtle">Monitor access points, alerts, and protocol status.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel col-8">
+        <div class="section-title">
+          <h3>ACTIVE OBJECTIVES</h3>
+          <span class="subtle">Priority Queue</span>
+        </div>
+        <div class="task-list">
+          <div class="task">
+            <div class="task-left">
+              <div class="check"></div>
+              <div>
+                <strong>Initialize core homepage sequence</strong>
+                <div class="subtle">UI framework synced and responding normally.</div>
+              </div>
+            </div>
+            <span class="chip">Ready</span>
+          </div>
+          <div class="task">
+            <div class="task-left">
+              <div class="check"></div>
+              <div>
+                <strong>Link command shortcuts</strong>
+                <div class="subtle">Buttons can be connected to other pages or application modules.</div>
+              </div>
+            </div>
+            <span class="chip">Pending</span>
+          </div>
+          <div class="task">
+            <div class="task-left">
+              <div class="check"></div>
+              <div>
+                <strong>Prepare intelligence feed</strong>
+                <div class="subtle">Space reserved for weather, messages, calendar, or live data.</div>
+              </div>
+            </div>
+            <span class="chip">Standby</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel col-7">
+        <div class="section-title">
+          <h3>SYSTEM PERFORMANCE</h3>
+          <span class="subtle">Live Telemetry</span>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-item">
+            <label><span>Processor Allocation</span><span id="cpuLabel">74%</span></label>
+            <div class="bar"><div class="fill" id="cpuBar" style="width: 74%;"></div></div>
+          </div>
+          <div class="bar-item">
+            <label><span>Network Stability</span><span id="netLabel">92%</span></label>
+            <div class="bar"><div class="fill" id="netBar" style="width: 92%;"></div></div>
+          </div>
+          <div class="bar-item">
+            <label><span>Shield Integrity</span><span id="shieldLabel">88%</span></label>
+            <div class="bar"><div class="fill" id="shieldBar" style="width: 88%;"></div></div>
+          </div>
+          <div class="bar-item">
+            <label><span>Command Accuracy</span><span id="cmdLabel">96%</span></label>
+            <div class="bar"><div class="fill" id="cmdBar" style="width: 96%;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel col-5">
+        <div class="section-title">
+          <h3>ASSISTANT FEED</h3>
+          <span class="subtle">Live Output</span>
+        </div>
+        <div class="cards" id="feed">
+          <div class="card">
+            <small>STATUS</small>
+            <strong>Voice interface calibrated</strong>
+            <span class="subtle">Awaiting instruction sequence from operator.</span>
+          </div>
+          <div class="card">
+            <small>NOTICE</small>
+            <strong>Primary systems nominal</strong>
+            <span class="subtle">No critical faults detected during current cycle.</span>
+          </div>
+          <div class="card">
+            <small>TIP</small>
+            <strong>Expandable dashboard ready</strong>
+            <span class="subtle">Attach music, weather, tasks, or notifications modules next.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p class="footer-note">J.A.R.V.I.S. interface active • Designed for futuristic dashboards and personal assistant systems</p>
+  </div>
+
+  <script>
+    const liveTime = document.getElementById('liveTime');
+    const statusText = document.getElementById('statusText');
+    const scanBtn = document.getElementById('scanBtn');
+    const protocolBtn = document.getElementById('protocolBtn');
+    const themeToggle = document.getElementById('themeToggle');
+    const feed = document.getElementById('feed');
+
+    const cpuBar = document.getElementById('cpuBar');
+    const netBar = document.getElementById('netBar');
+    const shieldBar = document.getElementById('shieldBar');
+    const cmdBar = document.getElementById('cmdBar');
+
+    const cpuLabel = document.getElementById('cpuLabel');
+    const netLabel = document.getElementById('netLabel');
+    const shieldLabel = document.getElementById('shieldLabel');
+    const cmdLabel = document.getElementById('cmdLabel');
+
+    const powerValue = document.getElementById('powerValue');
+    const threatValue = document.getElementById('threatValue');
+
+    function updateClock() {
+      const now = new Date();
+      liveTime.textContent = now.toLocaleTimeString();
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function addFeedCard(type, title, text) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <small>${type}</small>
+        <strong>${title}</strong>
+        <span class="subtle">${text}</span>
+      `;
+      feed.prepend(card);
+      if (feed.children.length > 4) {
+        feed.removeChild(feed.lastElementChild);
+      }
+    }
+
+    function randomValue(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function setBar(bar, label, value) {
+      bar.style.width = value + '%';
+      label.textContent = value + '%';
+    }
+
+    scanBtn.addEventListener('click', () => {
+      statusText.textContent = 'Running Diagnostics';
+      addFeedCard('SCAN', 'System scan initiated', 'Reviewing command pathways, panel response, and network telemetry.');
+
+      const cpu = randomValue(68, 89);
+      const net = randomValue(84, 98);
+      const shield = randomValue(80, 96);
+      const cmd = randomValue(91, 99);
+      const power = randomValue(94, 100);
+      const threatStates = ['Low', 'Guarded', 'Minimal'];
+
+      setBar(cpuBar, cpuLabel, cpu);
+      setBar(netBar, netLabel, net);
+      setBar(shieldBar, shieldLabel, shield);
+      setBar(cmdBar, cmdLabel, cmd);
+      powerValue.textContent = power + '%';
+      threatValue.textContent = threatStates[Math.floor(Math.random() * threatStates.length)];
+
+      setTimeout(() => {
+        statusText.textContent = 'Systems Nominal';
+        addFeedCard('RESULT', 'Diagnostics complete', 'All primary systems are stable and accepting new instructions.');
+      }, 1200);
+    });
+
+    protocolBtn.addEventListener('click', () => {
+      statusText.textContent = 'Opening Protocols';
+      addFeedCard('PROTOCOL', 'Command library opened', 'You can route this button to settings, pages, or a control center.');
+      setTimeout(() => {
+        statusText.textContent = 'Awaiting Commands';
+      }, 1000);
+    });
+
+    let altMode = false;
+    themeToggle.addEventListener('click', () => {
+      altMode = !altMode;
+      document.documentElement.style.setProperty('--glow', altMode ? '#f472b6' : '#6ee7ff');
+      document.documentElement.style.setProperty('--glow-soft', altMode ? 'rgba(244, 114, 182, 0.32)' : 'rgba(110, 231, 255, 0.32)');
+      document.documentElement.style.setProperty('--accent', altMode ? '#f59e0b' : '#7c3aed');
+      document.documentElement.style.setProperty('--accent-soft', altMode ? 'rgba(245, 158, 11, 0.24)' : 'rgba(124, 58, 237, 0.26)');
+      addFeedCard('INTERFACE', altMode ? 'Alternate color mode enabled' : 'Default interface restored', 'Visual profile updated successfully.');
+    });
+  </script>
+</body>
+</html>
